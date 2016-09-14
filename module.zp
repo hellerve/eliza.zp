@@ -1,0 +1,13 @@
+#{:name "eliza.zp"
+  :version "0.0.1"
+  :license "GPLv2"
+  :type :tool
+  :entry-point "eliza.zp"
+  :tests []
+  :author #{:name "Veit Heller"
+            :email "veit@veitheller.de"
+            :github "@hellerve"}
+  :zepto #{:version :any}
+  :dependencies ()
+  :dev-dependencies ()}
+

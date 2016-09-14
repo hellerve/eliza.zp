@@ -1,0 +1,49 @@
+(load "readline")
+(import-all "readline" "rl")
+
+(define (prepare)
+  (|> "eliza.zp/data"
+      zepto:find-on-path
+      car
+      parse
+      car))
+
+(define (treat-answer answer answer-key query translations)
+  (let* ((groups (car (regex:groups answer-key query)))
+         (patt   (|> (get-from groups 0 "")
+                     string:lower-case
+                     ($ (regex:split r/[^A-Za-z0-9]/ %))
+                     (curry map ($ (get-from translations % %)))
+                     ($ (string:join % " "))))
+         (subs   (string:substitute answer "{}" patt)))
+    (if (in? [#\. #\? #\!] (get-from subs (- (length subs) 2)))
+      (++ (substring subs 0 (- (length subs) 2))
+          (get-from subs (sub1 (length subs))))
+      subs)))
+
+(define (answer data query)
+  (let* ((answer-kv (hash:kv-reduce
+                     (lambda (acc x)
+                      (if (and (nil? acc) (regex:matches? (car x) query)) x acc))
+                     (nil)
+                     (get-from data :matches)))
+        (answer-key (car answer-kv))
+        (answers    (cadr answer-kv))
+        (answer     (get-from answers (randint (length answers)))))
+    (treat-answer answer answer-key query (get-from data :translations))))
+
+(define (main)
+  (begin
+    (write "I am the psychotherapist.")
+    (write "Please describe your problems.")
+    (write "Each time you are finished talking, hit enter.")
+    (write "If you want to quit the session, type quit.")
+    (let ((eliza (prepare)))
+      (let loop ((query (rl:readline "> ")))
+        (begin
+          (write (answer eliza query))
+          (if (eq? query "quit")
+            (exit 0)
+            (loop (rl:readline "> "))))))))
+
+(main)
