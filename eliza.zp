@@ -2,11 +2,7 @@
 (import-all "readline" "rl")
 
 (define (prepare)
-  (|> "eliza.zp/data"
-      zepto:find-on-path
-      car
-      parse
-      car))
+  (load "eliza.zp/data"))
 
 (define (treat-answer answer answer-key query translations)
   (let* ((groups (car (regex:groups answer-key query)))
@@ -34,6 +30,7 @@
 
 (define (main)
   (begin
+    (|> unix-timestamp cadr random) ; seed PRNG
     (write "I am the psychotherapist.")
     (write "Please describe your problems.")
     (write "Each time you are finished talking, hit enter.")
